@@ -26,14 +26,17 @@ imagery analysis (Part B) lives in its validation repository linked from there.
 
 ## Building
 
-Each document is a standalone LaTeX project. From `final/` or `proposal/`:
+Requires a full TeX Live (or MiKTeX) install with `latexmk`. Each document is a
+standalone project; from `final/` or `proposal/`:
 
 ```sh
-latexmk -pdf main.tex
+latexmk
 ```
 
-The final report also uses the `nomencl` package; if the list of symbols does not
-appear, run `makeindex main.nlo -s nomencl.ist -o main.nls` and build again.
+The `.latexmkrc` in each folder selects `pdflatex` and teaches `latexmk` the
+`nomencl` step (`makeindex` on `main.nlo`), so the bibliography and, where the
+document uses one, the list of symbols build in a single pass. `latexmk -C`
+removes all generated files.
 
 ## License
 
