@@ -1,9 +1,37 @@
-% The T5 decision (issue UNSWROV/bluerov2-docking#67) is pending: either the
-% control-first redesign (calibrated or velocity-closed feedforward plus a
-% velocity-state decay while stale) or the relative-frame estimator promised
-% in the submitted abstract. The section title and placeholder below fit
-% either outcome; rewrite once the decision is made.
+% This section presumes the control-first decision on the fix arm (issue
+% UNSWROV/bluerov2-docking#67): a velocity-closed feedforward plus a bounded
+% velocity state, with the relative-frame estimator in a supporting role. If
+% that decision changes, rewrite this section and Section VI's arm table.
 \section{Feedforward Redesign and Estimator}
 \label{sec:redesign}
 
-Placeholder, budget 0.75 page. The changes evaluated as arm C, with equations and a signal-path diagram against the original arm B, and a statement of what is unchanged (fusion, gating, bounds, controllers, state machine). If the relative-frame estimator is included, its state, process input and measurement model go here with the covariance propagation of the vehicle-velocity input.
+Section~\ref{sec:failure} locates the failure in the path from the estimated dock velocity to the vehicle's response, and in what the estimator does while it has no measurements. The redesign evaluated as arm C therefore changes those two things and nothing else.
+
+\subsection{Velocity-closed feedforward}
+
+The original method adds $K_{ff}\,\hat{v}_d$ directly to an effort-like command, so the vehicle's velocity response is $K_{ff}\,g$ times the dock velocity for whatever plant gain $g$ the mode and the trim happen to produce. The redesign treats the sum of the feedback command and the rotated dock velocity as a body-frame velocity setpoint and closes it on the vehicle's own odometry velocity:
+\begin{align}
+v_{\mathrm{ref}} &= C(e) + R_b^{w\,\top}\hat{v}_d, \nonumber\\
+u &= K_p\,(v_{\mathrm{ref}} - \hat{v}_v) + K_i\!\int (v_{\mathrm{ref}} - \hat{v}_v)\,dt,
+\label{eq:vloop}
+\end{align}
+where $C(e)$ is the unchanged position feedback on the body-frame error, $\hat{v}_v$ is the navigation velocity in the body frame, and $u$ is the effort command. The plant gain no longer sets the vehicle's amplitude; the loop drives the measured velocity to the setpoint whatever $g$ is, and the integral term removes the steady error that a mis-scaled gain would otherwise leave. The loop gains follow from the first-order plant identified in the step tests of Section~\ref{sec:design}, with the crossover placed below the identified lag so the loop stays well damped. The loop has a second property that Section~\ref{sec:results} tests directly: a slowly varying error $b_v$ in the navigation velocity appears in $\hat{v}_d$ (Section~\ref{sec:navobs}) and in $\hat{v}_v$ alike, so it cancels in $v_{\mathrm{ref}} - \hat{v}_v$ and the vehicle follows the true dock velocity. An open-loop feedforward has no such cancellation. Should the loop prove untunable within the campaign, the fallback is the open-loop law with $K_{ff}$ scaled to the identified gain per flight mode, which fixes the over-swing but not the bias.
+
+\subsection{Bounded velocity state during blackout}
+
+The constant-velocity filter keeps integrating its velocity state while no measurement is accepted, which produced the metre-scale excursions of Section~\ref{sec:failure}. The redesign decays the state once the update age exceeds a hold time,
+\begin{equation}
+\hat{v}_d \leftarrow \hat{v}_d\, e^{-\Delta t/\tau_v}\quad \text{for}\quad t - t_{\mathrm{upd}} > t_{\mathrm{hold}},
+\end{equation}
+with $t_{\mathrm{hold}} = \tau_v = 1$~s. Replaying the production filter offline on the recorded measurement streams, the change cuts the largest excursion at 8~s from 112 to 33~cm and leaves the tracking segments untouched. The remaining excursion is the dock continuing to sway while the estimate is frozen, the floor for any estimator without measurements, and it is bounded by twice the sway amplitude plus the drift accumulated over the hold time.
+
+\subsection{Relative-frame estimator}
+\label{sec:navobs}
+
+The estimator promised at abstract stage is retained in a supporting role. Its translational state is $x = [r,\; v_d]^\top$ with $r = p_d - p_v$ the dock position relative to the vehicle in world-aligned axes, propagated with the navigation velocity as a known input,
+\begin{equation}
+r_{k+1} = r_k + (v_{d,k} - \hat{v}_{v,k})\,\Delta t + w_r,\qquad v_{d,k+1} = v_{d,k} + w_v,
+\end{equation}
+and updated with the camera-relative translation rotated by attitude only, $z_k = r_k + \nu_k$; the vehicle's world position is never added \cite{kim2007relative,woffinden2007angles}. The uncertainty of the velocity input enters the process noise as $Q_{\mathrm{eff}} = Q_{\mathrm{dock}} + B\,R_{v_v}\,B^\top$ with $B = [-\Delta t\,I;\; 0]$. Replayed on the recorded trials, it reproduces the world-frame filter when navigation is exact, and under injected navigation error both filters absorb a slow velocity bias one for one, because a camera measuring relative position cannot separate a slowly varying vehicle-velocity error from dock velocity. What the relative formulation removes is the jitter the world-frame filter makes by differentiating white position noise, 1.4 against 4.3~cm/s of fast velocity error. It is therefore the velocity source for the navigation-error sweep of Section~\ref{sec:design}, not the fix; the fix is Eq.~\eqref{eq:vloop}.
+
+Fusion, gating, the velocity bound, both controllers' gains and tolerances, and the state machine are unchanged across all four arms.
