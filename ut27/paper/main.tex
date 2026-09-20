@@ -1,0 +1,53 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+\title{Visual Dock-Velocity Feedforward for ROV Docking to a Moving Station: Failure Mechanism, Feedforward Redesign and Estimator Robustness}
+
+\author{\IEEEauthorblockN{1\textsuperscript{st} Chak Wang Choi}
+\IEEEauthorblockA{\textit{School of Mechanical and Manufacturing Engineering} \\
+\textit{UNSW Sydney}\\
+Sydney, Australia \\
+z5413670@ad.unsw.edu.au}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} William J.B. Midgley}
+\IEEEauthorblockA{\textit{School of Mechanical and Manufacturing Engineering} \\
+\textit{UNSW Sydney}\\
+Sydney, Australia \\
+w.midgley@unsw.edu.au\\
+ORCID: 0000-0003-3786-1691}
+}
+
+\maketitle
+
+\begin{abstract}
+Placeholder. The abstract is written last, from the revised two-page abstract in \texttt{ut27/abstract/abstract\_v2.tex}, once the results of the core and navigation-error campaigns exist. Target 200 to 250 words.
+\end{abstract}
+
+\begin{IEEEkeywords}
+underwater docking, remotely operated vehicle, visual servoing, moving target, Kalman filter, velocity feedforward, plant identification
+\end{IEEEkeywords}
+
+\input{sections/01-introduction}
+\input{sections/02-related-work}
+\input{sections/03-system}
+\input{sections/04-failure-mechanism}
+\input{sections/05-redesign-and-estimator}
+\input{sections/06-experimental-design}
+\input{sections/07-results}
+\input{sections/08-discussion}
+\input{sections/09-conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

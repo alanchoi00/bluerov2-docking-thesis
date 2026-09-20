@@ -1,0 +1,18 @@
+\section{System}
+\label{sec:system}
+
+Placeholder, budget 1 page. Condensed from the thesis architecture and Part A methodology. Simulation stack (Gazebo, ArduSub software-in-the-loop, BlueROV2 Heavy, prescribed dock motion), the size-graded marker set in two sentences, fusion, the nine-state error-state filter with its two regimes, guidance and the two controllers, the feedforward path, and the state machine. State explicitly that the vehicle pose in simulation is Gazebo ground truth relayed into the transform tree, since Section~\ref{sec:failure} depends on it.
+
+\begin{figure*}[t]
+  \centering
+  \input{figures/tikz/architecture}
+  \caption{System architecture. The state machine gates the controllers on the filter's health signal; the dashed vehicle-to-camera path is the coupling examined in Section~\ref{sec:failure}.}
+  \label{fig:arch}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \input{figures/tikz/filter-structure}
+  \caption{Filter structure: the nine-state error-state filter with the two process-noise regimes, the measurement gate and the state bounds.}
+  \label{fig:kf}
+\end{figure*}
