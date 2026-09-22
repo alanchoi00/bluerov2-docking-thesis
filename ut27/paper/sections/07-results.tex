@@ -8,7 +8,7 @@ All four arms were run on one host and one code revision: 82 valid trials, three
 Fig.~\ref{fig:success} shows the envelope. The reactive baseline docks at every period, but from 8~s it does so by contact: two of three trials at 8~s and one at 6~s cross the aperture boundary before latching, with entry-plane offsets of 3 to 7~cm (Fig.~\ref{fig:capture}). The original feedforward reproduces the envelope of Section~\ref{sec:failure} on this host: clean to 16~s, contacts from 12~s, one loss at 10~s, and no seat in any of nine trials at 8 and 6~s. The oracle docks at every phase from 20 to 8~s, cleanly except once at 8~s, and fails all three phases at 6~s. The velocity-closed feedforward docks cleanly at every phase from 20 to 8~s and at one phase of three at 6~s; it is the only arm with no contact at any period down to 8~s.
 
 \begin{figure}[t]
-  \centerline{\includegraphics[width=\columnwidth]{figures/success_vs_period.png}}
+  \centerline{\includegraphics[width=0.92\columnwidth]{figures/success_vs_period.png}}
   \caption{Docking success versus sway period, three phases per cell (six for arm B at 8~s). Left: latched. Right: latched without crossing the aperture boundary.}
   \label{fig:success}
 \end{figure}
@@ -40,7 +40,7 @@ Fig.~\ref{fig:success} shows the envelope. The reactive baseline docks at every 
 Fig.~\ref{fig:overswing} plots the vehicle-to-dock lateral amplitude ratio, taken over the samples with a marker measurement, against sway frequency, with the loop model of Section~\ref{sec:failure} evaluated on the identified plant ($g = 2.7$, $T = 0.4$~s) and the fine-phase position gains. The original feedforward and the oracle lie on the same curve, 1.0 at 20~s rising to 1.6 at 8~s and 1.8 to 1.9 at 6~s, within the phase-to-phase spread of each other at every period. The model at unit feedforward gain reproduces the slope and the short-period values (1.47 predicted against 1.5 to 1.7 measured at 8~s; 1.67 against 1.7 to 1.9 at 6~s) and over-predicts by about 0.1 at the long periods, where the coarse-phase ramp holds the feedforward below unit gain for part of each window. Since the oracle feeds the true velocity, the coincidence of the two curves places the over-swing in the open-loop law and the plant, not in the estimate. The reactive baseline and the velocity-closed feedforward sit at 0.9 to 1.1 at every period; the velocity loop tracks the dock at ratio 1.0 to 1.2 with the phase lag its bandwidth implies (14$^\circ$ at 8~s and 21$^\circ$ at 6~s measured, against 19 and 24$^\circ$ designed).
 
 \begin{figure}[t]
-  \centerline{\includegraphics[width=0.9\columnwidth]{figures/overswing_vs_frequency.png}}
+  \centerline{\includegraphics[width=0.82\columnwidth]{figures/overswing_vs_frequency.png}}
   \caption{Vehicle-to-dock lateral amplitude ratio, the ratio of lateral standard deviations over the samples with a marker measurement (median and range over phases), against the loop model of Section~\ref{sec:failure} on the identified plant, at unit feedforward gain (fine phase) and 0.6 (coarse phase).}
   \label{fig:overswing}
 \end{figure}
@@ -50,7 +50,7 @@ Fig.~\ref{fig:overswing} plots the vehicle-to-dock lateral amplitude ratio, take
 The offset at the entry plane and the time to seat (Fig.~\ref{fig:capture}, Table~\ref{tab:core}) separate the arms that dock. The velocity-closed feedforward has the smallest offsets from 12~s down, 0.4 to 1.7~cm median against the baseline's 0.8 to 4.4~cm, and holds the seat tolerance at every period. The oracle, with the true velocity but the open-loop law, seats with 2 to 6~cm offsets from 16~s, larger than the baseline's at every period but 8~s: an accurate feedforward through a mis-scaled law is worse at the entry plane than none. The baseline is the fastest to seat, 17 to 25~s from 20 to 10~s, because it closes directly on the dock and rides the swing; the velocity-closed arm takes 40 to 60~s, following the dock at the standoff until the handoff gate latches, and 156~s at 6~s.
 
 \begin{figure}[t]
-  \centerline{\includegraphics[width=\columnwidth]{figures/capture_and_time.png}}
+  \centerline{\includegraphics[width=0.92\columnwidth]{figures/capture_and_time.png}}
   \caption{Median and range over phases of the lateral offset at the entry plane (left, docked trials and contacts) and the time to seat (right, docked trials).}
   \label{fig:capture}
 \end{figure}
