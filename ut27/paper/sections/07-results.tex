@@ -1,4 +1,83 @@
 \section{Results}
 \label{sec:results}
 
-Placeholder, budget 1.5 pages. Success versus period for arms A to D; capture error and closing speed; dock-velocity estimation error versus period; vehicle-to-dock amplitude ratio; the navigation-error heatmap for arms A to C. Figures come from the analysis scripts in the code repository.
+All four arms were run on one host and one code revision: 82 valid trials, three start phases per period (six for arm B at 8~s), with the outcomes scored offline by the same scripts. Per-trial metrics accompany the code.
+
+\subsection{Docking envelope}
+
+Fig.~\ref{fig:success} shows the envelope. The reactive baseline docks at every period, but from 8~s it does so by contact: two of three trials at 8~s and one at 6~s cross the aperture boundary before latching, with entry-plane offsets of 3 to 7~cm (Fig.~\ref{fig:capture}). The original feedforward reproduces the envelope of Section~\ref{sec:failure} on this host: clean to 16~s, contacts from 12~s, one loss at 10~s, and no seat in any of nine trials at 8 and 6~s. The oracle docks at every phase from 20 to 8~s, cleanly except once at 8~s, and fails all three phases at 6~s. The velocity-closed feedforward docks cleanly at every phase from 20 to 8~s and at one phase of three at 6~s; it is the only arm with no contact at any period down to 8~s.
+
+\begin{figure}[t]
+  \centerline{\includegraphics[width=\columnwidth]{figures/success_vs_period.png}}
+  \caption{Docking success versus sway period, three phases per cell (six for arm B at 8~s). Left: latched. Right: latched without crossing the aperture boundary.}
+  \label{fig:success}
+\end{figure}
+
+\begin{table}[t]
+  \caption{Core sweep. Docked (of which clean), median entry-plane lateral offset over the cell, and median time to seat.}
+  \label{tab:core}
+  \centering
+  \footnotesize\setlength{\tabcolsep}{3pt}
+  \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    Period [s] & 20 & 16 & 12 & 10 & 8 & 6 \\
+    \midrule
+    A docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 3 (1) & 3 (2) \\
+    B docked (clean) & 3 (3) & 3 (3) & 3 (2) & 2 (2) & 0 of 6 & 0 \\
+    C docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 4 (4) & 1 (1) \\
+    D docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 3 (2) & 0 \\
+    \midrule
+    A offset [cm] & 0.5 & 0.6 & 0.6 & 0.8 & 4.4 & 3.2 \\
+    C offset [cm] & 0.3 & 0.5 & 0.8 & 0.4 & 1.3 & 1.7 \\
+    A seat time [s] & 18 & 19 & 21 & 20 & 80 & 76 \\
+    C seat time [s] & 40 & 45 & 42 & 42 & 47 & 156 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Over-swing against the loop model}
+
+Fig.~\ref{fig:overswing} plots the vehicle-to-dock lateral amplitude ratio over the tracking windows against sway frequency, with the loop model of Section~\ref{sec:failure} evaluated on the identified plant ($g = 2.7$, $T = 0.4$~s) and the fine-phase position gains. The original feedforward and the oracle lie on the same curve, 1.0 at 20~s rising to 1.6 at 8~s and 1.8 to 1.9 at 6~s, within the phase-to-phase spread of each other at every period. The model at unit feedforward gain reproduces the slope and the short-period values (1.47 predicted against 1.5 to 1.7 measured at 8~s; 1.67 against 1.7 to 1.9 at 6~s) and over-predicts by about 0.1 at the long periods, where the coarse-phase ramp holds the feedforward below unit gain for part of each window. Since the oracle feeds the true velocity, the coincidence of the two curves places the over-swing in the open-loop law and the plant, not in the estimate. The reactive baseline and the velocity-closed feedforward sit at 0.9 to 1.1 at every period; the velocity loop tracks the dock at ratio 1.0 to 1.2 with the phase lag its bandwidth implies (14$^\circ$ at 8~s and 21$^\circ$ at 6~s measured, against 19 and 24$^\circ$ designed).
+
+\begin{figure}[t]
+  \centerline{\includegraphics[width=0.9\columnwidth]{figures/overswing_vs_frequency.png}}
+  \caption{Vehicle-to-dock lateral amplitude ratio over the tracking windows (median, range over phases) against the loop model of Section~\ref{sec:failure} on the identified plant, at unit feedforward gain (fine phase) and 0.6 (coarse phase).}
+  \label{fig:overswing}
+\end{figure}
+
+\subsection{Capture quality and time to seat}
+
+The offset at the entry plane and the time to seat (Fig.~\ref{fig:capture}, Table~\ref{tab:core}) separate the arms that dock. The velocity-closed feedforward has the smallest offsets from 12~s down, 0.4 to 1.7~cm median against the baseline's 0.8 to 4.4~cm, and holds the seat tolerance at every period. The oracle, with the true velocity but the open-loop law, seats with 2 to 6~cm offsets from 16~s, larger than the baseline's at every period but 8~s: an accurate feedforward through a mis-scaled law is worse at the entry plane than no feedforward. The baseline is the fastest to seat, 17 to 25~s from 20 to 10~s, because it closes directly on the dock and rides the swing; the velocity-closed arm takes 40 to 60~s, following the dock at the standoff until the handoff gate latches, and 156~s at 6~s.
+
+\begin{figure}[t]
+  \centerline{\includegraphics[width=\columnwidth]{figures/capture_and_time.png}}
+  \caption{Median and range over phases of the lateral offset at the entry plane (left, docked trials and contacts) and the time to seat (right, docked trials).}
+  \label{fig:capture}
+\end{figure}
+
+The 6~s limit of the velocity-closed arm is the coarse handoff, not tracking. In the two trials that timed out the vehicle held the standoff for the whole run with the relative error at 2.8 to 3.2~cm RMS, the estimate on the dock to 0.4~cm and the velocity state at ratio 0.96 to 1.06; the vehicle followed the dock at ratio 1.16 with 21$^\circ$ of lag, and the residual relative velocity kept the handoff's velocity-match test from latching for ten consecutive cycles. The phase that docked did so after 156~s at the standoff. The limit moves with the loop bandwidth or the gate design, not with the estimator.
+
+\subsection{Estimator under navigation error}
+
+Table~\ref{tab:nav} gives the offline replay of Section~\ref{sec:design}: both estimators run on the recorded measurement streams of four arm-B trials (20, 12, 10 and 8~s) with the vehicle navigation corrupted at three levels, three seeds each. The slow part of the dock-velocity error equals the injected bias at every level for both estimators (0.011 to 0.070~m/s against a bias of 0.008 to 0.077~m/s) and correlates with it at 0.6 to 0.9, so neither frame recovers the true dock velocity under a slow navigation bias: a camera measuring relative position cannot separate the two. What the relative-frame formulation removes is the fast part, 1.3 to 1.6~cm/s against 4.0 to 4.3~cm/s for the world-frame filter, which differentiates the white position error of the navigation solution into its velocity state. The relative position error, which the controllers act on, is unchanged at 3.5 to 3.7~cm RMS for both. The live navigation sweep of Section~\ref{sec:design} is reported separately once the injector's white position noise has been set to a realistic level; with the placeholder value of 5~mm at 100~Hz the coarse handoff gate, which differentiates the relayed pose, never latched in any of six trials, for the reactive and the original arm alike.
+
+\begin{table}[t]
+  \caption{Offline replay under first-order Gauss-Markov navigation error ($\tau_b = 30$~s): dock-velocity error split into slow and fast parts, mean over 12 replays per level.}
+  \label{tab:nav}
+  \centering
+  \footnotesize\setlength{\tabcolsep}{3pt}
+  \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    Level & $\sigma_b$ [m/s] & Arm & Slow [m/s] & Fast [m/s] & Corr. with bias & Rel. pos. [cm] \\
+    \midrule
+    none & 0 & B & 0.008 & 0.009 & & 2.9 \\
+     & & C & 0.008 & 0.013 & & 3.7 \\
+    low & 0.01 & B & 0.017 & 0.043 & 0.31 & 3.7 \\
+     & & C & 0.011 & 0.014 & 0.59 & 3.5 \\
+    medium & 0.03 & B & 0.027 & 0.042 & 0.64 & 3.7 \\
+     & & C & 0.024 & 0.014 & 0.84 & 3.5 \\
+    high & 0.10 & B & 0.067 & 0.040 & 0.87 & 3.6 \\
+     & & C & 0.070 & 0.016 & 0.92 & 3.5 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
