@@ -8,7 +8,7 @@
 
 \begin{document}
 
-\title{Visual Dock-Velocity Feedforward for ROV Docking to a Moving Station: Failure Mechanism, Feedforward Redesign and Estimator Robustness}
+\title{Visual Dock-Velocity Feedforward for ROV Docking to a Moving Station: Failure Mechanism, Velocity-Closed Feedforward and Estimator Robustness}
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Chak Wang Choi}
 \IEEEauthorblockA{\textit{School of Mechanical and Manufacturing Engineering} \\
@@ -64,9 +64,9 @@ What separates the regimes is the vehicle's response (Fig.~\ref{fig:mech}). With
 \label{fig:mech}
 \end{figure}
 
-\section{Proposed Redesign and Evaluation Plan}
+\section{Velocity-Closed Feedforward and Evaluation}
 
-The estimator is retained. Two changes address the mechanism: the feedforward becomes a velocity setpoint closed by a loop on the vehicle's odometry velocity, so the plant gain no longer enters; and the velocity state decays after one second without an update, which cuts the replayed blackout excursion from 112 to 33~cm. Over the same periods, three phases per cell and 82 trials on one host, the redesigned feedforward docks without contact at every phase from 20 to 8~s with entry-plane offsets under 2~cm and no over-swing (vehicle-to-dock amplitude 0.9 to 1.3), where the original fails every trial at 8 and 6~s; an oracle feedforward from ground-truth dock velocity over-swings exactly as the original does (1.0 to 1.8 with frequency) and fails at 6~s, so the limit is the open-loop law and the plant, not the estimate. A second sweep injects three levels of first-order Gauss-Markov navigation error. Replaying both estimators on the recorded trials under that error shows that each absorbs a slow velocity bias one for one, since a camera measuring relative position cannot separate it from dock velocity, and that the relative-frame estimator removes only the jitter a world-frame filter makes from position noise; the closed velocity loop is what cancels the bias.
+The estimator is retained. Two changes address the mechanism: the feedforward becomes a velocity setpoint closed by a loop on the vehicle's odometry velocity, so the plant gain no longer enters; and the velocity state decays after one second without an update, which cuts the replayed blackout excursion from 112 to 33~cm. Over the same periods, three phases per cell and 82 trials on one host, the velocity-closed feedforward docks without contact at every phase from 20 to 8~s with entry-plane offsets under 2~cm and no over-swing (vehicle-to-dock amplitude 0.9 to 1.3), where the original fails every trial at 8 and 6~s; an oracle feedforward from ground-truth dock velocity over-swings exactly as the original does (1.0 to 1.8 with frequency) and fails at 6~s, so the limit is the open-loop law and the plant, not the estimate. A second sweep injects three levels of first-order Gauss-Markov navigation error. Replaying both estimators on the recorded trials under that error shows that each absorbs a slow velocity bias one for one, since a camera measuring relative position cannot separate it from dock velocity, and that the relative-frame estimator removes only the jitter a world-frame filter makes from position noise; the closed velocity loop is what cancels the bias.
 
 \section{Conclusion}
 
