@@ -1,6 +1,6 @@
 """Paper figures from the per-trial metrics of the core sweep (all four arms, one host).
 
-Usage: python3 paper_figures.py <metrics.csv> <out_dir>
+Usage: python3 paper_figures.py <metrics.csv> <out_dir> [nav_metrics.csv]
 Needs numpy < 2 with the host matplotlib; run with the scratch scipy/numpy on PYTHONPATH.
 """
 import csv
@@ -94,11 +94,55 @@ def fig_capture(by, out):
     fig.tight_layout(); fig.savefig(out, dpi=200); plt.close(fig)
 
 
+LEVELS = ["none", "low", "medium", "high"]
+LEVEL_SIGMA = {"none": "0", "low": "0.01", "medium": "0.03", "high": "0.10"}
+
+
+def load_nav(path):
+    """Navigation-error cells grouped by (arm, period, level); the core sweep's cells
+    supply the level-none column."""
+    rows = list(csv.DictReader(open(path)))
+    by = defaultdict(list)
+    for r in rows:
+        lvl = r.get("nav", "") or "none"
+        if int(float(r["period"])) in (10, 8) and r["arm"] in ("A", "B", "C"):
+            by[(r["arm"], int(float(r["period"])), lvl)].append(r)
+    return by
+
+
+def fig_nav_heatmap(by, out):
+    """Docked fraction per arm and bias level, one panel per period."""
+    arms = ["A", "B", "C"]
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.4), sharey=True)
+    for ax, per in zip(axes, (10, 8)):
+        grid = np.full((len(arms), len(LEVELS)), np.nan)
+        for i, arm in enumerate(arms):
+            for j, lvl in enumerate(LEVELS):
+                rs = by.get((arm, per, lvl), [])
+                if rs:
+                    grid[i, j] = np.mean([r["docked"] in ("True", "1", "true") for r in rs])
+        im = ax.imshow(grid, vmin=0, vmax=1, cmap="Greens", aspect="auto")
+        for i in range(len(arms)):
+            for j in range(len(LEVELS)):
+                rs = by.get((arms[i], per, LEVELS[j]), [])
+                if rs:
+                    n = len(rs); k = int(round(grid[i, j] * n))
+                    ax.text(j, i, f"{k}/{n}", ha="center", va="center", fontsize=8,
+                            color="white" if grid[i, j] > 0.6 else "black")
+        ax.set_xticks(range(len(LEVELS))); ax.set_xticklabels([f"{l}\n{LEVEL_SIGMA[l]} m/s" for l in LEVELS], fontsize=7)
+        ax.set_yticks(range(len(arms))); ax.set_yticklabels([NAMES[a].split(" ")[0] + " " + " ".join(NAMES[a].split(" ")[1:]) for a in arms], fontsize=7)
+        ax.set_title(f"{per} s sway period", fontsize=9); ax.set_xlabel("navigation velocity bias (stationary std)", fontsize=8)
+    cb = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.02); cb.set_label("docked fraction", fontsize=8)
+    fig.savefig(out, dpi=200, bbox_inches="tight"); plt.close(fig)
+
+
 if __name__ == "__main__":
     by = load(sys.argv[1]); out = sys.argv[2]
     fig_success(by, f"{out}/success_vs_period.png")
     fig_overswing(by, f"{out}/overswing_vs_frequency.png")
     fig_capture(by, f"{out}/capture_and_time.png")
+    if len(sys.argv) > 3:
+        fig_nav_heatmap(load_nav(sys.argv[3]), f"{out}/nav_heatmap.png")
     for p in PERIODS:
         print(f"model {p:2d} s: fine {loop_model(p, 1.0):.2f}, coarse {loop_model(p, 0.6):.2f}")
     print("written")
