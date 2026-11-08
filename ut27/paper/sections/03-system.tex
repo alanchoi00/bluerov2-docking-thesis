@@ -7,21 +7,21 @@ The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics) with the prod
 
 \begin{figure*}[t]
   \centering
-  \input{figures/tikz/architecture}
+  \scalebox{0.88}{\input{figures/tikz/architecture}}
   \caption{System architecture. The state machine gates the controllers on the filter's health signal; the dashed vehicle-to-camera path is the coupling examined in Section~\ref{sec:failure}.}
   \label{fig:arch}
 \end{figure*}
 
 \begin{figure*}[t]
   \centering
-  \input{figures/tikz/filter-structure}
+  \scalebox{0.88}{\input{figures/tikz/filter-structure}}
   \caption{Filter structure: the nine-state error-state filter with the two process-noise regimes, the measurement gate and the state bounds.}
   \label{fig:kf}
 \end{figure*}
 
 \subsection{Perception}
 
-The dock face carries nine ArUco markers \cite{garrido2014automatic} in three size classes from 200~mm to 47.5~mm, placed so that the large outer pair carries acquisition at range and the small pair at camera eye level stays in frame during the final centimetres, in the spirit of fractal markers distributed spatially rather than nested \cite{romeroramirez2019fractal}. Each detected marker implies a dock origin through the surveyed layout. A spatial-consensus test on the implied orientations rejects outliers \cite{kim2024enhancing}, and the survivors are fused by inverse-variance weighting \cite{xu2021underwater} with a range-dependent noise model, $\sigma_p = \alpha r^2/s$ for a marker of side $s$ at range $r$, so that distant and small markers count less. The fused pose, in the camera frame, is transformed to the world frame through the vehicle pose at the image stamp and fed to a nine-state error-state Kalman filter over dock position, dock velocity and a small-angle attitude correction \cite{sola2017quaternion} (Fig.~\ref{fig:kf}). Two process-noise regimes define the two estimators compared throughout: \emph{static}, with zero velocity uncertainty and zero velocity process noise, which is a constant-position filter; and \emph{sway}, with white-acceleration noise of density $\sigma_a$ (0.16~m/s$^2$ nominal), which estimates dock velocity. Each update passes a Mahalanobis gate, the velocity state is bounded at 0.2~m/s, and a health signal reports \textsc{healthy}, \textsc{degraded} or \textsc{stale} from the update age and the position covariance.
+The dock face carries nine ArUco markers \cite{garrido2014automatic} in three size classes from 200~mm to 47.5~mm, placed so that the large outer pair carries acquisition at range and the small pair at camera eye level stays in frame during the final centimetres. Each detected marker implies a dock origin through the surveyed layout. A spatial-consensus test on the implied orientations rejects outliers \cite{kim2024enhancing}, and the survivors are fused by inverse-variance weighting \cite{xu2021underwater} with a range-dependent noise model, $\sigma_p = \alpha r^2/s$ for a marker of side $s$ at range $r$, so that distant and small markers count less. The fused pose, in the camera frame, is transformed to the world frame through the vehicle pose at the image stamp and fed to a nine-state error-state Kalman filter over dock position, dock velocity and a small-angle attitude correction \cite{sola2017quaternion} (Fig.~\ref{fig:kf}). Two process-noise regimes define the two estimators compared throughout: \emph{static}, with zero velocity uncertainty and zero velocity process noise, which is a constant-position filter; and \emph{sway}, with white-acceleration noise of density $\sigma_a$ (0.16~m/s$^2$ nominal), which estimates dock velocity. Each update passes a Mahalanobis gate, the velocity state is bounded at 0.2~m/s, and a health signal reports \textsc{healthy}, \textsc{degraded} or \textsc{stale} from the update age and the position covariance.
 
 \subsection{Guidance, control and supervision}
 

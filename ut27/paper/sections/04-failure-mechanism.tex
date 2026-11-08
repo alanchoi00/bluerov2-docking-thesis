@@ -12,12 +12,6 @@ Fig.~\ref{fig:pdock} shows the sweep that exposed the failure, arms A and B at t
 \end{figure}
 
 \begin{figure}[t]
-  \centerline{\includegraphics[width=0.68\columnwidth]{figures/rov_trajectory_failure.png}}
-  \caption{Failed feedforward trial at 8~s. Top: lateral position of the true dock, the estimate and the vehicle. Bottom: range to the dock with phases shaded.}
-  \label{fig:trajectory}
-\end{figure}
-
-\begin{figure}[t]
   \centerline{\includegraphics[width=0.88\columnwidth]{figures/mechanism_p8.png}}
   \caption{Decomposition of the failed 8~s trial. Top: the estimate sits on the dock while the vehicle over-swings, then dead-reckons when markers are lost (shaded). Middle: the velocity state tracks the true dock velocity; the vehicle's is twice it. Bottom: filter health and lateral command; the command is zero throughout the blackout.}
   \label{fig:mech}
@@ -25,7 +19,7 @@ Fig.~\ref{fig:pdock} shows the sweep that exposed the failure, arms A and B at t
 
 \subsection{What the system's own signals say}
 
-In the failed trials the filter's velocity state and the position extrapolated from it reach many times the true dock amplitude, up to a metre off, while every alignment error the controller computes against that estimate reads within seat tolerance, and over whole runs the estimate's excess motion correlates at 0.88 with the vehicle's own position. The natural reading, and the one we first made, is that the vehicle's motion leaks into the world-frame dock measurement through the vehicle pose it is reconstructed with, the velocity state integrates the leak into a phantom dock velocity, and the feedforward closes an unstable loop on it. Fig.~\ref{fig:trajectory} shows the failed 8~s trial as that reading sees it: tracking, a metre-scale excursion of the estimate, a snap back, a repeat.
+In the failed trials the filter's velocity state and the position extrapolated from it reach many times the true dock amplitude, up to a metre off, while every alignment error the controller computes reads within seat tolerance, and over whole runs the estimate's excess motion correlates at 0.88 with the vehicle's own position. The natural reading, and the one we first made, is that the vehicle's motion leaks into the world-frame measurement through the vehicle pose, the velocity state integrates the leak into a phantom dock velocity, and the feedforward closes an unstable loop on it.
 
 \subsection{What the recorded trials say}
 
@@ -45,6 +39,6 @@ The failure is therefore a feedforward loop, not an estimator loop. With feedfor
 \begin{equation}
 \frac{x_v}{x_d} = \frac{K_{ff}\,s\,G_p(s) + C(s)\,G_p(s)}{s + C(s)\,G_p(s)}\Big|_{s = j\omega};
 \end{equation}
-with $K_{ff}\,g$ of 1.6 in the coarse phase and 2.7 in the fine phase the feedforward term alone exceeds unity, and the feedback term, whose phase the time constant $T$ erodes at 8~s, cannot cancel the excess. The amplitude ratio grows as $\omega$ rises because the feedback's authority falls with frequency while the feedforward's does not, which is the trend in the data. The estimator enters only through $\hat{v}_d$, which is accurate; it is the plant model the feedforward was designed against that was wrong, and no estimator setting could repair that, which is why the process-noise sweep found nothing.
+with $K_{ff}\,g$ of 1.6 in the coarse phase and 2.7 in the fine phase the feedforward term alone exceeds unity, and the feedback term, whose phase the time constant $T$ erodes at 8~s, cannot cancel the excess. The ratio grows with $\omega$ because the feedback's authority falls with frequency while the feedforward's does not, which is the trend in the data. The estimator enters only through $\hat{v}_d$, which is accurate; the plant model the feedforward was designed against was wrong, which no estimator setting could repair.
 
 The estimator does carry one hazard of its own: a velocity state that keeps integrating while no measurement arrives. Replaying the production filter offline on the recorded measurement streams reproduces the recorded estimate to 0.3 to 0.8~cm RMS while measurements arrive and reproduces the blackout excursions; decaying the velocity state after one second without an accepted update, with a one-second time constant, cuts the 8~s excursion from 112 to 33~cm, the remainder being the dock continuing to sway while the estimate is frozen. That is the estimator half of the fix.
