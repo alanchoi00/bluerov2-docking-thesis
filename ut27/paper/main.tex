@@ -5,6 +5,7 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc}
 \usepackage[hidelinks]{hyperref}
@@ -13,13 +14,13 @@
 
 \title{Visual Dock-Velocity Feedforward for ROV Docking to a Moving Station: Failure Mechanism, Velocity-Closed Feedforward and Estimator Robustness}
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Chak Wang Choi}
+\author{\IEEEauthorblockN{Chak Wang Choi}
 \IEEEauthorblockA{\textit{School of Mechanical and Manufacturing Engineering} \\
 \textit{UNSW Sydney}\\
 Sydney, Australia \\
 z5413670@ad.unsw.edu.au}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} William J.B. Midgley}
+\IEEEauthorblockN{William J.B. Midgley}
 \IEEEauthorblockA{\textit{School of Mechanical and Manufacturing Engineering} \\
 \textit{UNSW Sydney}\\
 Sydney, Australia \\
@@ -30,11 +31,11 @@ ORCID: 0000-0003-3786-1691}
 \maketitle
 
 \begin{abstract}
-Moored and suspended docking stations move with the waves, so the terminal visual stage of underwater docking must track a moving target. The natural extension of a static-dock pipeline is to estimate the dock velocity onboard and feed it forward into the vehicle command. We report what happened when that was done for a passive-marker docking stage on a low-cost ROV in simulation with the production autopilot in the loop: a reactive baseline docks at every sway period, while a constant-velocity estimator with velocity feedforward fails at the 8 and 6~s periods of the intended site, and its own signals blame the estimator. Rebuilding every measurement from the recorded trials shows the estimate is accurate and the failure is control: the feedforward over-drives a plant whose identified gain is 2.7 against the 1.3 to 1.6 it was tuned to, and the apparent phantom velocity is dead-reckoning during the marker blackout the over-swing causes. An oracle feedforward from the true dock velocity over-swings identically, placing the limit in the open-loop law. Closing the feedforward as a body-velocity setpoint on the navigation velocity, with a bounded velocity state during blackout, removes the over-swing at every period and docks cleanly from 20 to 8~s across an 82-trial, four-arm sweep, with entry-plane offsets under 2~cm. Under first-order Gauss-Markov navigation error, world-frame and relative-frame estimators both absorb a slow velocity bias one for one; the relative frame removes only the fast error, and the velocity loop is what cancels the bias.
+Moored and suspended docking stations move with the waves, so the terminal visual stage of underwater docking must track a moving target. The natural extension of a static-dock pipeline is to estimate the dock velocity onboard and feed it forward into the vehicle command. We report what happened when that was done for a passive-marker docking stage on a low-cost ROV in simulation with the production autopilot in the loop: a reactive baseline docks at every sway period, while a constant-velocity estimator with velocity feedforward fails at the 8 and 6~s periods of the intended site, and its own signals blame the estimator. Rebuilding every measurement from the recorded trials shows the estimate is accurate and the failure is control: the feedforward over-drives a plant whose identified gain is 2.7 against the 1.3 to 1.6 it was tuned to, and the apparent phantom velocity is dead-reckoning during the marker blackout the over-swing causes. An oracle feedforward from the true dock velocity over-swings identically, so the over-swing is set by the open-loop law and the plant; at 8~s the estimate's phase lag then decides whether the over-swung vehicle keeps the markers in view. Closing the feedforward as a body-velocity setpoint on the navigation velocity, with a bounded velocity state during blackout, removes the over-swing at every period and latches without aperture contact in all 16 trials from 20 to 8~s in a 76-trial, four-arm sweep with three trials per cell, with median entry-plane offsets under 2~cm; at 6~s it docks in one trial of three where the reactive baseline docks in all three. Under first-order Gauss-Markov navigation error, world-frame and relative-frame estimators both absorb a slow velocity bias one for one; the relative frame removes only the fast error, and only the velocity loop cancels the bias, 17 of 18 trials against 4 of 18.
 \end{abstract}
 
 \begin{IEEEkeywords}
-underwater docking, remotely operated vehicle, visual servoing, moving target, Kalman filter, velocity feedforward, plant identification
+underwater docking, remotely operated vehicle, visual servoing, fiducial markers, ArUco, moving target, Kalman filter, velocity feedforward, plant identification
 \end{IEEEkeywords}
 
 \input{sections/01-introduction}
