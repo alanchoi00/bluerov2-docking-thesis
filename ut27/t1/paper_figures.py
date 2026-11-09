@@ -1,6 +1,6 @@
 """Paper figures from the per-trial metrics of the core sweep (all four arms, one host).
 
-Usage: python3 paper_figures.py <metrics.csv> <out_dir> [nav_metrics.csv]
+Usage: python3 paper_figures.py <metrics.csv> <out_dir> [nav_metrics.csv] [prefix_metrics.csv]
 Needs numpy < 2 with the host matplotlib; run with the scratch scipy/numpy on PYTHONPATH.
 """
 import csv
@@ -53,12 +53,13 @@ def fig_success(by, out):
         a.set_xticks(x); a.set_xticklabels([str(p) for p in PERIODS]); a.set_xlabel("sway period [s]")
         a.set_ylim(0, 1.05); a.set_title(title, fontsize=9); a.grid(axis="y", lw=0.3)
     ax[0].set_ylabel("fraction of trials")
-    ax[0].legend(fontsize=6.5, loc="lower left", framealpha=0.9)
-    fig.tight_layout(); fig.savefig(out, dpi=200); plt.close(fig)
+    handles, labels = ax[0].get_legend_handles_labels()
+    fig.legend(handles, labels, fontsize=7, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.06, 1, 1)); fig.savefig(out, dpi=200, bbox_inches="tight"); plt.close(fig)
 
 
 def fig_overswing(by, out):
-    fig, ax = plt.subplots(figsize=(3.5, 2.6))
+    fig, ax = plt.subplots(figsize=(3.5, 3.0))
     f = np.array([1.0 / p for p in PERIODS])
     ff = np.linspace(1 / 22, 1 / 5.5, 200)
     ax.plot(ff, [loop_model(1 / v, 1.0) for v in ff], "k-", lw=1, label="loop model, fine phase (unit gain)")
@@ -70,10 +71,12 @@ def fig_overswing(by, out):
         lo = [np.min(v) if v else np.nan for v in vals]; hi = [np.max(v) if v else np.nan for v in vals]
         ax.errorbar(f, med, yerr=[np.array(med) - np.array(lo), np.array(hi) - np.array(med)], fmt=marks[arm], ms=4, capsize=2, lw=0.8, label=NAMES[arm])
     ax.set_xlabel("sway frequency [Hz]"); ax.set_ylabel("vehicle / dock lateral amplitude")
-    ax.set_ylim(0.6, 2.1); ax.grid(lw=0.3); ax.legend(fontsize=5.5, loc="lower right", framealpha=0.9)
+    ax.set_ylim(0.6, 2.1); ax.grid(lw=0.3)
     sec = ax.secondary_xaxis("top", functions=(lambda v: 1 / np.maximum(v, 1e-6), lambda v: 1 / np.maximum(v, 1e-6)))
     sec.set_xticks(PERIODS); sec.set_xlabel("period [s]", fontsize=8)
-    fig.tight_layout(); fig.savefig(out, dpi=200); plt.close(fig)
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, fontsize=5.5, loc="lower center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 0.0))
+    fig.tight_layout(rect=(0, 0.10, 1, 1)); fig.savefig(out, dpi=200, bbox_inches="tight"); plt.close(fig)
 
 
 def fig_capture(by, out):
@@ -88,10 +91,61 @@ def fig_capture(by, out):
             a.errorbar(PERIODS, med, yerr=[np.array(med) - np.array(lo), np.array(hi) - np.array(med)], fmt=marks[arm] + "-", ms=4, capsize=2, lw=0.8, label=NAMES[arm])
     ax[0].set_ylabel("entry-plane lateral offset [cm]"); ax[1].set_ylabel("time to seat [s]")
     for a in ax:
-        a.set_xlabel("sway period [s]"); a.invert_xaxis(); a.grid(lw=0.3)
+        a.set_xlabel("sway period [s]"); a.set_xticks(PERIODS); a.invert_xaxis(); a.grid(lw=0.3)
+    for arm in ARMS:
+        for p in PERIODS:
+            rs = [r for r in by[(arm, p)] if r["outcome"] == "CONTACT" and r["capture_lateral_m"] not in ("nan", "")]
+            if rs:
+                ax[0].plot([p] * len(rs), [abs(float(r["capture_lateral_m"])) * 100 for r in rs], marks[arm], ms=4, mfc="white", mec="k", mew=0.6, lw=0)
+    ax[0].plot([], [], "o", ms=4, mfc="white", mec="k", mew=0.6, lw=0, label="contact trial")
     ax[0].axhline(3.0, color="grey", lw=0.6, ls=":"); ax[0].text(6.2, 3.15, "seat tolerance", fontsize=6, color="grey", ha="right")
     ax[0].legend(fontsize=6, loc="upper left", framealpha=0.9)
     fig.tight_layout(); fig.savefig(out, dpi=200); plt.close(fig)
+
+
+def fig_prefix_sweep(path, out):
+    """The sweep that exposed the failure (July host, arms A and B): docked and
+    contact-free fractions per period, with n per cell."""
+    rows = list(csv.DictReader(open(path)))
+    by = defaultdict(list)
+    for r in rows:
+        by[({"static": "A", "sway": "B"}[r["arm"]], int(float(r["period"])))].append(r)
+    fig, ax = plt.subplots(figsize=(3.5, 2.2))
+    x = np.arange(len(PERIODS)); wdt = 0.36
+    for i, arm in enumerate("AB"):
+        docked = [frac(by[(arm, p)], lambda r: r["docked"] in ("True", "1", "true")) for p in PERIODS]
+        clean = [frac(by[(arm, p)], lambda r: r["outcome"] == "CLEAN") for p in PERIODS]
+        ax.bar(x + (i - 0.5) * wdt, docked, wdt, color=f"C{i}", alpha=0.35, label=f"{NAMES[arm]}, docked")
+        ax.bar(x + (i - 0.5) * wdt, clean, wdt, color=f"C{i}", label=f"{NAMES[arm]}, without contact")
+        for j, p in enumerate(PERIODS):
+            n = len(by[(arm, p)])
+            if n != 3:
+                ax.text(x[j] + (i - 0.5) * wdt, max(docked[j], 0) + 0.03, f"n={n}", ha="center", va="bottom", fontsize=6)
+    ax.set_xticks(x); ax.set_xticklabels([str(p) for p in PERIODS]); ax.set_xlabel("sway period [s]")
+    ax.set_ylim(0, 1.12); ax.set_ylabel("fraction of trials"); ax.grid(axis="y", lw=0.3)
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, fontsize=6, loc="lower center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 0.0))
+    fig.tight_layout(rect=(0, 0.10, 1, 1)); fig.savefig(out, dpi=200, bbox_inches="tight"); plt.close(fig)
+
+
+def table_core(by):
+    """Table I rows: docked (clean), median |lateral offset| at the entry plane, median seat time."""
+    def med(vals, fmt):
+        return fmt % np.median(vals) if vals else "--"
+    lines = []
+    for arm in ARMS:
+        cells = []
+        for p in PERIODS:
+            rs = by[(arm, p)]; d = sum(r["docked"] in ("True", "1", "true") for r in rs); c = sum(r["outcome"] == "CLEAN" for r in rs)
+            cells.append(f"{d} ({c}) of {len(rs)}" if len(rs) != 3 else f"{d} ({c})")
+        lines.append(f"{arm} docked (clean) & " + " & ".join(cells) + r" \\")
+    for arm in ARMS:
+        cells = [med([abs(float(r["capture_lateral_m"])) * 100 for r in by[(arm, p)] if r["capture_lateral_m"] not in ("nan", "")], "%.1f") for p in PERIODS]
+        lines.append(f"{arm} offset [cm] & " + " & ".join(cells) + r" \\")
+    for arm in ARMS:
+        cells = [med([float(r["t_dock_s"]) for r in by[(arm, p)] if r["docked"] in ("True", "1", "true") and r["t_dock_s"] not in ("nan", "")], "%.0f") for p in PERIODS]
+        lines.append(f"{arm} seat time [s] & " + " & ".join(cells) + r" \\")
+    return "\n".join(lines)
 
 
 LEVELS = ["none", "low", "medium", "high"]
@@ -143,6 +197,9 @@ if __name__ == "__main__":
     fig_capture(by, f"{out}/capture_and_time.png")
     if len(sys.argv) > 3:
         fig_nav_heatmap(load_nav(sys.argv[3]), f"{out}/nav_heatmap.png")
+    if len(sys.argv) > 4:
+        fig_prefix_sweep(sys.argv[4], f"{out}/clean_pdock.png")
+    print(table_core(by))
     for p in PERIODS:
         print(f"model {p:2d} s: fine {loop_model(p, 1.0):.2f}, coarse {loop_model(p, 0.6):.2f}")
     print("written")

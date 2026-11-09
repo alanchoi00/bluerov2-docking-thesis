@@ -9,28 +9,33 @@ Fig.~\ref{fig:success} shows the envelope. The reactive baseline docks at every 
 
 \begin{figure}[t]
   \centerline{\includegraphics[width=0.88\columnwidth]{figures/success_vs_period.png}}
-  \caption{Docking success versus sway period, three phases per cell (six for arm B at 8~s). Left: latched. Right: latched without crossing the aperture boundary.}
+  \caption{Docking success versus sway period on one host, three trials per cell (six for arm B and four for arm C at 8~s). Left: latched. Right: latched without crossing the aperture boundary.}
   \label{fig:success}
 \end{figure}
 
 \begin{table}[t]
-  \caption{Core sweep. Docked (of which clean), median entry-plane lateral offset over the cell, and median time to seat.}
+  \caption{Core sweep, 76 trials. Docked (of which without contact) out of three trials per cell unless stated; median over the cell of the lateral offset at the entry plane, over the trials that crossed it; median time to seat over the docked trials. Generated from the per-trial metrics by the same script as Figs.~\ref{fig:success} to~\ref{fig:capture}.}
   \label{tab:core}
   \centering
-  \footnotesize\setlength{\tabcolsep}{3pt}
+  \footnotesize\setlength{\tabcolsep}{2.6pt}
   \begin{tabular}{@{}lcccccc@{}}
     \toprule
     Period [s] & 20 & 16 & 12 & 10 & 8 & 6 \\
     \midrule
     A docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 3 (1) & 3 (2) \\
     B docked (clean) & 3 (3) & 3 (3) & 3 (2) & 2 (2) & 0 of 6 & 0 \\
-    C docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 4 (4) & 1 (1) \\
+    C docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 4 (4) of 4 & 1 (1) \\
     D docked (clean) & 3 (3) & 3 (3) & 3 (3) & 3 (3) & 3 (2) & 0 \\
     \midrule
-    A offset [cm] & 0.5 & 0.6 & 0.6 & 0.8 & 4.4 & 3.2 \\
-    C offset [cm] & 0.3 & 0.5 & 0.8 & 0.4 & 1.3 & 1.7 \\
-    A seat time [s] & 18 & 19 & 21 & 20 & 80 & 76 \\
-    C seat time [s] & 40 & 45 & 42 & 42 & 47 & 156 \\
+    A offset [cm] & 0.5 & 0.7 & 0.2 & 0.7 & 2.1 & 3.4 \\
+    B offset [cm] & 2.1 & 3.6 & 1.4 & 0.3 & 4.3 & 2.4 \\
+    C offset [cm] & 0.3 & 0.6 & 0.4 & 0.5 & 1.6 & 1.7 \\
+    D offset [cm] & 1.9 & 4.2 & 2.5 & 3.4 & 2.4 & 5.7 \\
+    \midrule
+    A seat time [s] & 18 & 20 & 20 & 22 & 80 & 76 \\
+    B seat time [s] & 23 & 27 & 34 & 37 & -- & -- \\
+    C seat time [s] & 39 & 45 & 42 & 42 & 47 & 156 \\
+    D seat time [s] & 29 & 27 & 34 & 37 & 56 & -- \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -51,7 +56,7 @@ The offset at the entry plane and the time to seat (Fig.~\ref{fig:capture}, Tabl
 
 \begin{figure}[t]
   \centerline{\includegraphics[width=0.92\columnwidth]{figures/capture_and_time.png}}
-  \caption{Median and range over phases of the lateral offset at the entry plane (left, docked trials and contacts) and the time to seat (right, docked trials).}
+  \caption{Median and range over the cell of the lateral offset at the entry plane (left; hollow markers are the individual trials scored as contacts) and of the time to seat (right, docked trials only; a line is broken where no trial docked).}
   \label{fig:capture}
 \end{figure}
 

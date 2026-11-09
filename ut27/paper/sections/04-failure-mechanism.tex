@@ -6,14 +6,14 @@
 Fig.~\ref{fig:pdock} shows the sweep that exposed the failure, arms A and B at three phases per cell with contact-censored scoring, recorded before the fix on a different host; Section~\ref{sec:results} repeats all four arms on one host. The baseline docks in every trial at every period and cleanly down to 8~s; at 6~s two of three trials brush the aperture boundary at 0.03 to 0.06~m/s before latching. The feedforward method matches it down to 12~s, degrades at 10~s with one pre-latch contact, and fails at 8 and 6~s, the band of the mean New South Wales wave period. Clean insertions cross the entry plane 0.003 to 0.05~m off axis at 0.06 to 0.11~m/s. The result reproduced on a second host at a different real-time factor and with an earlier filter revision (velocity state unbounded): the baseline docked in every cell, the feedforward method docked in two of three trials at 8~s and one of three at 6~s, and its vehicle-to-dock amplitude ratio rose from 0.97 at 20~s to 1.41 at 8~s and 1.55 at 6~s against 0.85 to 0.98 for the baseline. Retuning the acceleration-noise density over 0.02 to 0.16~m/s$^2$ and bounding the velocity state and covariance limited the size of the estimate excursions but did not move the cliff; at every density the velocity state tracked the true dock velocity (amplitude ratio 0.93 to 1.01, correlation 0.73 to 0.96) while the vehicle over-swung the dock by 1.6 to 1.9 and the trials at 8 and 6~s failed.
 
 \begin{figure}[t]
-  \centerline{\includegraphics[width=0.62\columnwidth]{figures/clean_pdock.png}}
-  \caption{Docking success versus sway period, reactive baseline versus constant-velocity filter with feedforward; raw (dotted) and contact-censored (solid) scoring.}
+  \centerline{\includegraphics[width=0.95\columnwidth]{figures/clean_pdock.png}}
+  \caption{The sweep that exposed the failure (first host, arms A and B, three trials per cell except one valid trial for B at 8~s): fraction docked (light) and docked without aperture contact (dark) against sway period.}
   \label{fig:pdock}
 \end{figure}
 
 \begin{figure}[t]
   \centerline{\includegraphics[width=0.88\columnwidth]{figures/mechanism_p8.png}}
-  \caption{Decomposition of the failed 8~s trial. Top: the estimate sits on the dock while the vehicle over-swings, then dead-reckons when markers are lost (shaded). Middle: the velocity state tracks the true dock velocity; the vehicle's is twice it. Bottom: filter health and lateral command; the command is zero throughout the blackout.}
+  \caption{Decomposition of the failed 8~s trial. Top: the estimate sits on the dock while the vehicle over-swings, then dead-reckons when markers are lost (shaded). Middle: the velocity state tracks the true dock velocity; the vehicle's is twice it. Bottom: filter health (1 healthy, 2 degraded, 3 stale) and lateral command; the command is zero throughout the blackout.}
   \label{fig:mech}
 \end{figure}
 
