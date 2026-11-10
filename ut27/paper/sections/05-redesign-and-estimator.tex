@@ -5,7 +5,14 @@ Section~\ref{sec:failure} locates the failure in the path from the estimated doc
 
 \subsection{Velocity-closed feedforward}
 
-The original method adds $K_{ff}\,\hat{v}_d$ directly to an effort-like command, so the vehicle's velocity response is $K_{ff}\,g$ times the dock velocity for whatever plant gain $g$ the mode and the trim happen to produce. The velocity-closed feedforward treats the sum of the feedback command and the rotated dock velocity as a body-frame velocity setpoint and closes it on the vehicle's own odometry velocity:
+\begin{figure}[t]
+  \centering
+  \scalebox{0.8}{\input{figures/tikz/control-laws}}
+  \caption{The two feedforward laws. Open loop: the dock velocity, scaled by $K_{ff}$, is added to the effort command and nothing measures the vehicle's response; arms B, \Bgt{} and D differ only in the source and the gain. Closed loop (arm C): the position feedback, in velocity units, plus the dock velocity is a setpoint for a PI loop on the measured navigation velocity, with the identified gain as a model feedforward; the shaded blocks are the conversions the ablation prices.}
+  \label{fig:laws}
+\end{figure}
+
+The original method adds $K_{ff}\,\hat{v}_d$ directly to an effort-like command, so the vehicle's velocity response is $K_{ff}\,g$ times the dock velocity for whatever plant gain $g$ the mode and the trim happen to produce. The velocity-closed feedforward treats the sum of the feedback command and the rotated dock velocity as a body-frame velocity setpoint and closes it on the vehicle's own odometry velocity (Fig.~\ref{fig:laws}):
 \begin{align}
 v_{\mathrm{ref}} &= C(e) + R_b^{w\,\top}\hat{v}_d, \nonumber\\
 u &= \frac{v_{\mathrm{ref}}}{g} + K_v\,(v_{\mathrm{ref}} - \hat{v}_v) + K_{vi}\!\int (v_{\mathrm{ref}} - \hat{v}_v)\,dt,
