@@ -49,7 +49,7 @@ Table~\ref{tab:core} gives the envelope. The reactive baseline docks at every pe
     \midrule
     nothing converted & 17 of 19 & 39 to 47 & 2.6~cm & 17 of 18 \\
     + position gains $\times g$ & 18 of 18 & 41 to 43 & 1.8~cm & 17 of 18 \\
-    + speed limits $\times g$ & 16 of 18 & 16 to 18 & 1.1~cm & 9 of 18 \\
+    + speed limits $\times g$ & 16 of 18 & 16 to 18 & 1.1~cm & 15 of 18 \\
     + model feedforward (arm C) & 18 of 18 & 18 to 24 & 0.8~cm & 16 of 18 \\
     \bottomrule
   \end{tabular}
@@ -75,7 +75,7 @@ The offset at the entry plane and the time to seat (Fig.~\ref{fig:capture}, Tabl
   \label{fig:capture}
 \end{figure}
 
-Table~\ref{tab:ablation} prices the unit conversions of Section~\ref{sec:redesign}. With nothing converted the loop docks to 8~s but seats in about 42~s and misses two of three trials at 6~s, holding the standoff with the 2.8 to 3.2~cm RMS relative error its 28$^\circ$ lag predicts ($|1-H| = 0.46$ of the sway amplitude) while the handoff's velocity-match test never holds. Converting the position gains restores the outer loop and the 6~s cells latch, at offsets under 2~cm, but the seat time stays at 41 to 43~s because the fine-phase closing speed is still 0.07~m/s. Converting the speed limits as well makes the pure PI fast, 16 to 18~s, but at that speed its lag shows: two core trials never latch and under navigation error it over-swings by 1.5 to 10, demotes ten times and docks in 9 of 18. The model feedforward, the $v_{\mathrm{ref}}/g$ term of Eq.~\eqref{eq:vloop}, removes the lag and gives arm C: every core trial clean, 18 to 24~s, and 16 of 18 under navigation error.
+Table~\ref{tab:ablation} prices the unit conversions of Section~\ref{sec:redesign}. With nothing converted the loop docks to 8~s but seats in about 42~s and misses two of three trials at 6~s, holding the standoff with the 2.8 to 3.2~cm RMS relative error its 28$^\circ$ lag predicts ($|1-H| = 0.46$ of the sway amplitude) while the handoff's velocity-match test never holds. Converting the position gains restores the outer loop and the 6~s cells latch, at offsets under 2~cm, but the seat time stays at 41 to 43~s because the fine-phase closing speed is still 0.07~m/s. Converting the speed limits as well makes the pure PI fast, 16 to 18~s, but at that speed its lag shows: two core trials never latch; under navigation error it docks in 15 of 18, the misses losing the markers in the coarse approach. The model feedforward, the $v_{\mathrm{ref}}/g$ term of Eq.~\eqref{eq:vloop}, removes the lag and gives arm C: every core trial clean, 18 to 24~s, and 16 of 18 under navigation error.
 
 \subsection{Estimators and controllers under navigation error}
 
