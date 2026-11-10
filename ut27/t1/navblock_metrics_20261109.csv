@@ -35,7 +35,7 @@ navblock_B_sway_p8_ph2.094_navmedium,B,sway,8.0,2.094,medium,CONTACT,False,nan,0
 navblock_B_sway_p8_ph4.189_navhigh,B,sway,8.0,4.189,high,NO_DOCK,False,nan,nan,nan,nan,nan,nan,nan,456.986,459.8898,0.0897,1.7701,-0.0367,nan,2.3174,0.0715,2,2,2
 navblock_B_sway_p8_ph4.189_navlow,B,sway,8.0,4.189,low,CLEAN,True,56.416,0.0319,0.0282,0.0426,0.0631,nan,nan,16.5367,15.6877,0.0266,1.1058,-0.0275,nan,1.5999,0.0034,0,1,0
 navblock_B_sway_p8_ph4.189_navmedium,B,sway,8.0,4.189,medium,CONTACT,False,nan,0.0101,0.0109,0.0149,0.0899,0.1523,0.0106,47.3565,42.7769,0.0436,1.1093,-0.0451,nan,1.6587,0.0287,1,2,1
-navblock_Cnone_sway_p10_ph0.0_navhigh,Cnone,sway,10.0,0.0,high,CLEAN,True,106.397,0.0061,0.0179,0.0189,0.0727,nan,nan,334.5275,350.1746,0.0997,1.9307,-0.1184,nan,1.6408,0.0135,0,2,1
+navblock_Cnone_sway_p10_ph0.0_navhigh,Cnone,sway,10.0,0.0,high,CLEAN,True,106.803,0.0061,0.0179,0.0189,0.0727,nan,nan,334.5275,350.1746,0.0997,1.9307,-0.1184,nan,1.6408,0.0135,0,2,1
 navblock_Cnone_sway_p10_ph0.0_navlow,Cnone,sway,10.0,0.0,low,CLEAN,True,52.807,-0.0215,0.0168,0.0272,0.0177,nan,nan,16.5396,16.3852,0.0176,1.0838,0.2239,nan,0.9746,0.0037,0,1,0
 navblock_Cnone_sway_p10_ph0.0_navmedium,Cnone,sway,10.0,0.0,medium,CLEAN,True,88.154,0.0127,0.0088,0.0154,0.0162,nan,nan,119.3756,106.6659,0.0432,1.2883,0.132,nan,1.0291,0.0105,0,1,0
 navblock_Cnone_sway_p10_ph2.094_navhigh,Cnone,sway,10.0,2.094,high,CLEAN,True,112.259,0.0195,0.0108,0.0223,0.0962,nan,nan,402.1193,411.4127,0.1037,1.8143,-0.1529,nan,1.5162,0.0143,0,1,1

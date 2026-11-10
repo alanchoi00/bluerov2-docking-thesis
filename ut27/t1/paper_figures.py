@@ -163,6 +163,8 @@ def load_nav(*paths):
     rows = [r for p in paths for r in csv.DictReader(open(p))]
     by = defaultdict(list)
     for r in rows:
+        if r["cell"].startswith("navtest"):
+            continue  # the injector test cells of 2026-09-21 are not part of either sweep
         lvl = r.get("nav", "") or "none"
         if int(float(r["period"])) in (10, 8) and r["arm"] in ("A", "B", "C", "D", "Cnone", "Cgains", "Cnoff"):
             by[(r["arm"], int(float(r["period"])), lvl)].append(r)
@@ -172,7 +174,7 @@ def load_nav(*paths):
 def fig_nav_heatmap(by, out):
     """Docked fraction per arm and bias level, one panel per period."""
     arms = [a for a in ("A", "B", "C", "D") if any(by.get((a, p, l)) for p in (10, 8) for l in LEVELS)]
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.4 + 0.45 * len(arms)), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.2 + 0.45 * len(arms)), sharey=True)
     for ax, per in zip(axes, (10, 8)):
         grid = np.full((len(arms), len(LEVELS)), np.nan)
         for i, arm in enumerate(arms):
