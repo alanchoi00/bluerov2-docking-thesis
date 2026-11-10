@@ -5,12 +5,12 @@
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.9\columnwidth]{figures/sim_views.png}
+  \includegraphics[width=0.84\columnwidth]{figures/sim_views.png}
   \caption{The simulated docking station in Gazebo with the vehicle at the capture envelope (left) and the forward camera's view with the ArUco detections overlaid (right).}
   \label{fig:sim}
 \end{figure}
 
-The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics, Fig.~\ref{fig:sim}) with the production ArduSub firmware executed software-in-the-loop through the ArduPilot Gazebo plugin, so the path from velocity command through mode controller to motor mixing is the code a physical vehicle runs. The vehicle model, hydrodynamics and bring-up derive from the open-source Blue framework \cite{blue2024software,palmer2024angler}, with the drag coefficients aligned to published BlueROV2 Heavy identification. The forward camera renders 1920 by 1080 pixels with a 62$^\circ$ horizontal field of view at 10~Hz, without water-column effects. The world places the docking station 5~m ahead of the spawn point at 1.5~m depth. A plugin drives the dock through a prescribed sinusoidal sway and heave of 0.1~m amplitude with a 90$^\circ$ relative phase, an orbital motion representative of wave forcing on a moored structure, with period and start phase set per trial. Mechanical capture is not modelled; success is defined at the capture envelope and contact with the structure is detected in scoring. The pipeline is the one developed for a static dock in \cite{choi2026thesis}; Table~\ref{tab:params} lists its parameters. The vehicle pose used by every node is the Gazebo ground-truth odometry at 100~Hz, relayed into the transform tree; Section~\ref{sec:failure} depends on this, and Section~\ref{sec:design} replaces it with a corrupted navigation solution.
+The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics, Fig.~\ref{fig:sim}) with the production ArduSub firmware executed software-in-the-loop through the ArduPilot Gazebo plugin, so the path from velocity command through mode controller to motor mixing is the code a physical vehicle runs. The vehicle model, hydrodynamics and bring-up derive from the open-source Blue framework \cite{blue2024software,palmer2024angler}, with the drag coefficients aligned to published BlueROV2 Heavy identification. The forward camera renders 1920 by 1080 pixels with a 62$^\circ$ horizontal field of view at 10~Hz, without water-column effects. The world places the docking station 5~m ahead of the spawn point at 1.5~m depth. A plugin drives the dock through a prescribed sinusoidal sway and heave of 0.1~m amplitude with a 90$^\circ$ relative phase, an orbital motion standing in for wave forcing on a moored structure, with period and start phase set per trial. Mechanical capture is not modelled; success is defined at the capture envelope and contact with the structure is detected in scoring. The pipeline is the one developed for a static dock in \cite{choi2026thesis}; Table~\ref{tab:params} lists its parameters. The vehicle pose used by every node is the Gazebo ground-truth odometry at 100~Hz, relayed into the transform tree; Section~\ref{sec:failure} depends on this, and Section~\ref{sec:design} replaces it with a corrupted navigation solution.
 
 
 \begin{table}[t]
@@ -25,14 +25,14 @@ The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics, Fig.~\ref{fig
     A reactive & static, $v$ pinned & none & -- \\
     B original & sway & $\hat{v}_d$ & open loop into effort, 0.6 coarse / 1.0 fine \\
     \Bgt{} oracle & sway & true $v_d$ & B's law with the ground-truth velocity \\
-    C velocity-closed & sway, decay when stale & $\hat{v}_d$ & velocity setpoint, PI on $\hat{v}_v$ ($K_p$ 0.30, $K_i$ 0.74) plus model feedforward $1/g$; position gains and speed limits $\times g$ \\
+    C velocity-closed & sway, decay when stale & $\hat{v}_d$ & velocity setpoint, PI on $\hat{v}_v$ ($K_v$ 0.30, $K_{vi}$ 0.74) plus model feedforward $1/g$; position gains and speed limits $\times g$ \\
     D rescaled & sway & $\hat{v}_d$ & open loop into effort, $1/g = 0.37$ both phases \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[t]
-  \caption{Parameters common to all arms.}
+  \caption{Parameters common to all arms. Gains and caps are in command units (one unit is full-scale pilot input); the physical equivalents use $g = 2.7$~m/s per unit.}
   \label{tab:params}
   \centering
   \footnotesize\setlength{\tabcolsep}{3pt}
@@ -43,9 +43,9 @@ The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics, Fig.~\ref{fig
     Filter & 30~Hz predict, $\chi^2$ gate 18.5 (3 dof, 99.9~\%), init on 2 markers \\
     Sway regime & $\sigma_a = 0.16$~m/s$^2$ ($\sqrt{\mathrm{Hz}}$ implied), $|\hat{v}_d| \le 0.2$~m/s \\
     Health & healthy: age $<$ 0.5~s and $\sigma_p <$ 0.02~m; stale: age $>$ 3~s or $\sigma_p >$ 0.15~m \\
-    Coarse PD & $K_p$ surge 1.0, sway 0.5, heave 2.0, yaw 1.0; $K_d$ sway 0.3; caps 0.3, 0.3, 0.4~m/s \\
+    Coarse PD & $K_p$ surge 1.0, sway 0.5, heave 2.0, yaw 1.0; $K_d$ sway 0.3; caps 0.3, 0.3, 0.4 units (0.8, 0.8, 1.1~m/s) \\
     Standoff and handoff & 1~m out; position 0.10~m, boresight 0.08~m, yaw 0.10~rad, relative speed $<$ 0.15~m/s (EMA 0.3), 10 cycles at 20~Hz \\
-    Fine PD & $K_p$ surge 0.4, sway 0.8, heave 2.0, yaw 1.0; $K_d$ surge 0.8, sway 0.3; caps 0.07, 0.15, 0.3~m/s \\
+    Fine PD & $K_p$ surge 0.4, sway 0.8, heave 2.0, yaw 1.0; $K_d$ surge 0.8, sway 0.3; caps 0.07, 0.15, 0.3 units (0.19, 0.4, 0.8~m/s); ramp floor 0.02 units (0.054~m/s) \\
     Align and seat & lateral 0.03, vertical 0.025, yaw 0.05~rad; seat at 0.10~m, 0.03~m, 0.05~rad, 10 cycles \\
     Feedforward & clamp 0.25~m/s; coarse ramp 1.5 to 0.3~m; degraded gain 0.5; supervisor 10~Hz, demote after 2~s of loss \\
     Command channel & one unit = full-scale pilot input on the autopilot's manual-control channel \\
@@ -55,7 +55,7 @@ The vehicle is a BlueROV2 Heavy in Gazebo (gz-sim~8, DART physics, Fig.~\ref{fig
 
 \subsection{Perception}
 
-The dock face carries nine ArUco markers \cite{garrido2014automatic} in three size classes from 200~mm to 47.5~mm, placed so that the large outer pair carries acquisition at range and the small pair at camera eye level stays in frame during the final centimetres. Each detected marker implies a dock origin through the surveyed layout. A spatial-consensus test on the implied orientations rejects outliers \cite{kim2024enhancing}, and the survivors are fused by inverse-variance weighting \cite{xu2021underwater} with a range-dependent noise model, $\sigma_p = \alpha r^2/s$ for a marker of side $s$ at range $r$, so that distant and small markers count less. The fused pose, in the camera frame, is transformed to the world frame through the vehicle pose at the image stamp and fed to a nine-state error-state Kalman filter over dock position, dock velocity and a small-angle attitude correction. Two process-noise regimes define the two estimators compared throughout: \emph{static}, with zero velocity uncertainty and zero velocity process noise, which is a constant-position filter; and \emph{sway}, with white-acceleration noise of spectral density $\sigma_a^2$ ($\sigma_a = 0.16$~m/s$^2$ nominal), which estimates dock velocity. Each update passes a Mahalanobis gate, the velocity state is bounded at 0.2~m/s, and a health signal reports \textsc{healthy}, \textsc{degraded} or \textsc{stale} from the update age and the position covariance.
+The dock face carries nine ArUco markers \cite{garrido2014automatic} in three size classes from 200~mm to 47.5~mm, sized so that the large markers carry acquisition at range and the small ones stay in frame to the end. Each detected marker implies a dock origin through the surveyed layout. A spatial-consensus test on the implied orientations rejects outliers \cite{kim2024enhancing}, and the survivors are fused by inverse-variance weighting \cite{xu2021underwater} with a range-dependent noise model, $\sigma_p = \alpha r^2/s$ for a marker of side $s$ at range $r$, so that distant and small markers count less. The fused pose, in the camera frame, is transformed to the world frame through the vehicle pose at the image stamp and fed to a nine-state error-state Kalman filter over dock position, dock velocity and a small-angle attitude correction. Two process-noise regimes define the two estimators compared throughout: \emph{static}, with zero velocity uncertainty and zero velocity process noise, which is a constant-position filter; and \emph{sway}, with white-acceleration noise of spectral density $\sigma_a^2$ ($\sigma_a = 0.16$~m/s$^2$ nominal), which estimates dock velocity. Each update passes a Mahalanobis gate, the velocity state is bounded at 0.2~m/s, and a health signal reports \textsc{healthy}, \textsc{degraded} or \textsc{stale} from the update age and the position covariance.
 
 \subsection{Guidance, control and supervision}
 
