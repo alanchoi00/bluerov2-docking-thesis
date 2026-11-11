@@ -399,3 +399,50 @@ Maximum lag over the 18 cells 1.74 s; no node left after any cell; injected posi
 **Reading.** Under navigation error the pure PI at full speed (15/18) and arm C with the model feedforward (16/18) are level. The model feedforward's measured benefit is in the core sweep only: 18/18 clean against 16/18, largest entry offset 0.8 against 1.1 cm. The paper's ablation table, its results sentence and the discussion sentence were corrected to match. `t1/armCnoff_metrics_20261110.csv` and `t1/armCnoff_results.csv` now hold the rerun for the navigation rows (cells `armH3_*`); the backlogged rows are kept in `t1/armCnoff_nav_backlogged_metrics_20261109.csv` and `t1/armCnoff_nav_backlogged_results_20261109.csv` and must not be used.
 
 **Trap for later sweeps.** Every live navigation sweep must export `NAV_SIGMA_NP=0.001`. At the injector default of 5 mm the handoff's velocity-match test (finite difference of the relative position per 20 Hz tick, threshold 0.15 m/s) sits under its own noise floor of about 0.22 m/s, the handoff never fires and every cell times out at the standoff. Two reruns launched without the export (tag armH2, 18/18 timeouts, and one cell tagged fix98) are invalid for that reason.
+
+## 25. Arm C under Doppler-log velocity noise and ping rate, 2026-11-10
+
+**Why.** Supervisor meeting: vehicle velocity measurements are usually noisy, and arm C is the only arm that closes a loop on them. Sim issue #97, PR #100.
+
+**Noise model.** The navigation velocity is sampled at the ping rate and held until the next ping (zero-order hold). Each ping adds one zero-mean white Gaussian draw per axis. No bias (`nav_error_level:=white`), 1 mm white position noise (`NAV_SIGMA_NP=0.001`), seed 0. Arm C, six periods, three phases, 18 trials per block.
+
+| Level | Source |
+| --- | --- |
+| 0.005 m/s | datasheet single-ping precision (Teledyne, Nortek) |
+| 0.02 m/s | nominal value in Sahoo and Klein, Ocean Engineering 366 (2026) 127766 |
+| 0.04 m/s | largest measured on a BlueROV2 with a Water Linked A50, Song, Bagoren and Skinner, arXiv:2307.08647 |
+
+Rates: 10 Hz, and 4 Hz, the A50's slowest ping rate.
+
+**Result.**
+
+| Block | Noise, rate | Clean | Contact then docked | Not docked | Median seat (clean) | Median standoff wait |
+| --- | --- | --- | --- | --- | --- | --- |
+| core (armG) | none, 100 Hz | 18/18 | 0 | 0 | 20.1 s | |
+| vn005 | 0.005 m/s, 10 Hz | 17/18 | 1 | 0 | 24.5 s | 3.2 s |
+| vn020 | 0.02 m/s, 10 Hz | 17/18 | 0 | 1 | 24.5 s | 4.0 s |
+| vn040 | 0.04 m/s, 10 Hz | 16/18 | 0 | 2 | 25.9 s | 6.7 s |
+| vn005r4 | 0.005 m/s, 4 Hz | 15/18 | 2 | 1 | 38.8 s | 13.2 s |
+| vn040r4 | 0.04 m/s, 4 Hz | 14/18 | 0 | 4 | 55.5 s | 31.6 s |
+
+Maximum measurement lag per block 1.3 to 2.7 s, none near the 10 s TF cache, no node left after any cell, so the process graph was clean (Section 24).
+
+**Statistics.** Pooled 10 Hz: 50/54 clean (Wilson 0.82 to 0.97), 51/54 docked. Pooled 4 Hz: 29/36 clean (0.65 to 0.90), 31/36 docked. Fisher exact: clean 10 Hz against 4 Hz p = 0.11; docked p = 0.26; core 18/18 against pooled 10 Hz p = 0.57; 0.005 against 0.04 m/s at 10 Hz p = 1.0. The counts do not separate anywhere. The seat times do (rank-sum, clean trials): core against pooled 10 Hz p < 1e-6; 0.005 against 0.04 m/s at 10 Hz p = 0.43; 10 Hz against 4 Hz at 0.005 m/s p = 3.5e-5; 0.005 against 0.04 m/s at 4 Hz p = 0.016.
+
+**Reading.** At 10 Hz the noise level does not matter within this sample: about 5 s slower than the core sweep at every level. At 4 Hz the hold alone costs about 14 s of median seat time and the largest noise about 17 s more, so the slow rate is the enabling condition and at 4 Hz rate and noise contribute comparably. All of the extra time is spent waiting at the standoff: the vehicle's true velocity jitter there is about 0.11 m/s RMS in every 10 Hz block and 0.144 and 0.150 m/s in the two 4 Hz blocks, against the 0.15 m/s velocity-match limit of the handoff (10 consecutive cycles at 20 Hz). The inner loop was tuned against a 100 Hz velocity, and a held sample puts more of the white noise inside the loop bandwidth (about 2.5 times more power at 4 Hz than at 10 Hz).
+
+**The trials that did not dock (8 of 90).**
+
+- Two (vn040r4, 6 s and 8 s, phase 2.094) waited at the standoff for the whole budget, handed off at about 198 and 208 s and were cut by the timeout during the insertion.
+- Four (vn020 12 s phase 0; vn040 8 s phase 2.094; vn005r4 6 s phase 0; vn040r4 16 s phase 2.094) never left COARSE: the dock estimate went unhealthy and the coarse approach held with zero command to the timeout.
+- Two (vn040 20 s phase 2.094; vn040r4 16 s phase 4.189) handed off, were demoted after about 25 s in FINE, and then locked out the same way. Both crossed the aperture boundary while drifting, so the scorer labels them CONTACT, not docked.
+
+The lockout appears in four of the five blocks, including the lowest noise at 4 Hz, and was also seen in the armH3 rerun without velocity noise (Section 24), so these counts do not tie it to the noise. Its cause was not isolated.
+
+**Contacts.** Five trials crossed the aperture boundary, each after one demotion; three then docked (vn005 12 s phase 2.094; vn005r4 12 s phase 4.189 and 6 s phase 4.189), two are the lockouts above.
+
+**Offsets, and a metric trap.** The paper's entry offset is `capture_lateral_m`. On that metric the clean trials are within 2.4 cm in every block (core sweep 0.8 cm). The combined `capture_offset_m` reaches 3.0 to 5.1 cm in the noise blocks against 2.4 cm in the core sweep. Compare like with like; an early summary mixed the two.
+
+**Files.** `t1/vn005_metrics_20261110.csv`, `t1/vn020_metrics_20261110.csv`, `t1/vn040_metrics_20261110.csv`, `t1/vn005r4_metrics_20261110.csv`, `t1/vn040r4_metrics_20261110.csv` and the matching `t1/vn*_results.csv`. `vn040_results.csv` has one NORUN row (12 s phase 0, interrupted) followed by its rerun.
+
+**What it means for the paper.** Arm C stays a viable option on a Doppler log at 10 Hz. On a slow log it still docks but waits at the handoff, and the paper says so and names three untested remedies: a lower inner-loop bandwidth, a model prediction between pings, or a handoff limit sized to the hold. No revised arm was run.
