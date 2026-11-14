@@ -7,7 +7,7 @@ Section~\ref{sec:failure} locates the failure in the path from the estimated doc
 
 \begin{figure}[t]
   \centering
-  \scalebox{0.8}{\input{figures/tikz/control-laws}}
+  \resizebox{\columnwidth}{!}{\input{figures/tikz/control-laws}}
   \caption{The two feedforward laws. Open loop: the dock velocity, scaled by $K_{ff}$, is added to the effort command and nothing measures the vehicle's response; arms B, \Bgt{} and D differ only in the source and the gain. Closed loop (arm C): the position feedback, in velocity units, plus the dock velocity is a setpoint for a PI loop on the measured navigation velocity, with the identified gain as a model feedforward; the shaded blocks are the conversions the ablation prices.}
   \label{fig:laws}
 \end{figure}

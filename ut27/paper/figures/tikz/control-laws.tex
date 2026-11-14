@@ -1,35 +1,47 @@
 \begin{tikzpicture}[font=\scriptsize, >={Stealth[length=1.6mm]}, x=1mm, y=1mm,
   blk/.style={draw, rounded corners=1pt, align=center, inner sep=2pt, minimum height=5mm},
-  sum/.style={draw, circle, inner sep=0pt, minimum size=3.2mm},
+  sum/.style={draw, circle, inner sep=0pt, minimum size=3mm},
+  sgn/.style={inner sep=0pt, font=\tiny},
+  dot/.style={circle, fill, inner sep=0pt, minimum size=1mm},
   wrong/.style={blk, fill=orange!20}, fix/.style={blk, fill=green!15}]
-  % ---------- open loop: B, Bgt, D ----------
+  % open loop: B, Bgt, D
   \node[anchor=west] at (0,13) {\textbf{Open loop} (B, \Bgt, D): nothing measures the vehicle's response};
   \node[blk] (oe) at (6,0) {position\\error};
-  \node[blk] (oc) at (17,0) {$C$};
-  \node[sum] (os) at (33,0) {$+$};
-  \node[blk] (op) at (47,0) {plant\\$g/(1+sT)$};
-  \node[blk] (ov) at (65,0) {vehicle\\velocity};
-  \node[blk] (ovd) at (5,7.5) {$\hat v_d$, or true $v_d$};
-  \node[wrong] (ok) at (33,7.5) {$\times K_{ff}$ (0.6 / 1.0; D: $1/g$)};
-  \draw[->] (oe) -- (oc); \draw[->] (oc) -- (os); \draw[->] (os) -- node[below]{effort} (op); \draw[->] (op) -- (ov);
-  \draw[->] (ovd) -- (ok); \draw[->] (ok) -- (os);
-  % ---------- closed loop: C ----------
-  \node[anchor=west] at (0,-11) {\textbf{Closed loop} (C): the measured velocity is fed back};
+  \node[blk] (oc) at (22,0) {$C$};
+  \node[sum] (os) at (50,0) {};
+  \node[blk] (op) at (74,0) {plant\\$g/(1+sT)$};
+  \node[blk] (ov) at (100,0) {vehicle\\velocity};
+  \node[blk] (ovd) at (12,7.5) {$\hat v_d$, or true $v_d$};
+  \node[wrong] (ok) at (50,7.5) {$\times K_{ff}$ (0.6 / 1.0; D: $1/g$)};
+  \draw[->] (oe) -- (oc);
+  \draw[->] (oc) -- node[sgn, above, pos=0.9, yshift=0.5mm]{$+$} (os);
+  \draw[->] (os) -- node[above]{effort $u$} (op);
+  \draw[->] (op) -- (ov);
+  \draw[->] (ovd) -- (ok);
+  \draw[->] (ok) -- node[sgn, right, pos=0.45, xshift=0.7mm]{$+$} (os);
+  % closed loop: C
+  \node[anchor=west] at (0,-9) {\textbf{Closed loop} (C): the measured velocity is fed back};
   \node[blk] (ce) at (6,-24) {position\\error};
-  \node[fix] (cc) at (18,-24) {$gC$, limits\\$\times g$};
-  \node[sum] (cs1) at (28,-24) {$+$};
-  \node[sum] (cs2) at (36,-24) {$-$};
-  \node[blk] (cpi) at (45,-24) {$K_v$, $K_{vi}$};
-  \node[sum] (cs3) at (54,-24) {$+$};
-  \node[blk] (cp) at (62,-24) {plant};
-  \node[blk] (cv) at (75,-24) {vehicle\\velocity};
-  \node[blk] (cvd) at (20,-17) {$\hat v_d$};
-  \node[fix] (cff) at (46,-17) {$\times 1/g$ (model ff)};
-  \draw[->] (ce) -- (cc); \draw[->] (cc) -- (cs1);
-  \draw[->] (cs1) -- node[below, yshift=0.3mm]{$v_{\mathrm{ref}}$} (cs2);
-  \draw[->] (cs2) -- (cpi); \draw[->] (cpi) -- (cs3); \draw[->] (cs3) -- (cp); \draw[->] (cp) -- (cv);
-  \draw[->] (cvd) -| (cs1);
-  \draw[->] (32,-24) -- (32,-17) -- (cff);
-  \draw[->] (cff.east) -| (cs3);
-  \draw[->] (cv.south) -- ++(0,-4) -| node[below, pos=0.3]{measured $\hat v_v$} (cs2.south);
+  \node[fix] (cc) at (21,-24) {$gC$, limits\\$\times g$};
+  \node[sum] (cs1) at (33,-24) {};
+  \node[dot] (cb) at (42,-24) {};
+  \node[sum] (cs2) at (49,-24) {};
+  \node[blk] (cpi) at (60,-24) {PI\\$K_v$, $K_{vi}$};
+  \node[sum] (cs3) at (72,-24) {};
+  \node[blk] (cp) at (86,-24) {plant\\$g/(1+sT)$};
+  \node[blk] (cv) at (103,-24) {vehicle\\velocity};
+  \node[blk] (cvd) at (21,-16) {$\hat v_d$};
+  \node[fix] (cff) at (57,-16) {$\times 1/g$ (model ff)};
+  \draw[->] (ce) -- (cc);
+  \draw[->] (cc) -- node[sgn, above, pos=0.62, yshift=0.5mm]{$+$} (cs1);
+  \draw[->] (cvd) -| node[sgn, right, pos=0.8, xshift=0.7mm]{$+$} (cs1);
+  \draw (cs1) -- node[above]{$v_{\mathrm{ref}}$} (cb);
+  \draw[->] (cb) -- node[sgn, above, pos=0.5, yshift=0.5mm]{$+$} (cs2);
+  \draw[->] (cb) |- (cff);
+  \draw[->] (cs2) -- (cpi);
+  \draw[->] (cpi) -- node[sgn, above, pos=0.62, yshift=0.5mm]{$+$} (cs3);
+  \draw[->] (cff) -| node[sgn, right, pos=0.8, xshift=0.7mm]{$+$} (cs3);
+  \draw[->] (cs3) -- node[above]{$u$} (cp);
+  \draw[->] (cp) -- (cv);
+  \draw[->] (cv.south) -- ++(0,-3.5) -| node[below, pos=0.25]{measured $\hat v_v$} node[sgn, right, pos=0.9, xshift=0.7mm]{$-$} (cs2.south);
 \end{tikzpicture}
